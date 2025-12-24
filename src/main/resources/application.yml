@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: wallet-api
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:walletdb}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres123}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      minimum-idle: ${DB_MIN_IDLE:5}
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: false
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        query:
+          in_clause_parameter_padding: true
+
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.yml
+    enabled: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 5000ms
+
+server:
+  port: ${SERVER_PORT:8080}
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    max-connections: 10000
+    accept-count: 100
+    connection-timeout: 5000
+
+wallet:
+  lock:
+    timeout: ${LOCK_TIMEOUT:5000}
+    waitTime: ${LOCK_WAIT_TIME:3000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+      base-path: /management
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    com.example.wallet: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+
+redisson:
+  singleServerConfig:
+    address: "redis://${spring.data.redis.host}:${spring.data.redis.port}"
+    connectionPoolSize: 10
+    connectionMinimumIdleSize: 5
+    timeout: 5000
